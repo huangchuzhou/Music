@@ -3,17 +3,25 @@
     android:layout_width="match_parent"
     android:background="@drawable/sliding_bg"
     android:layout_height="match_parent">
-    <ListView
-        android:id="@+id/lvLRC"
+    <ScrollView
+        android:id="@+id/sv"
         android:layout_width="match_parent"
-        android:layout_height="420dp"></ListView>
+        android:layout_height="350dp">
+        <ListView
+            android:id="@+id/lvLRC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></ListView>
+
+    </ScrollView>
+
 
     <RelativeLayout
-
-        android:layout_below="@id/lvLRC"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/sv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
         <ImageView
+            android:layout_alignParentBottom="true"
             android:src="@drawable/main_album"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -23,9 +31,11 @@
 
 
         <LinearLayout
+            android:layout_alignParentBottom="true"
             android:id="@+id/info"
             android:orientation="vertical"
             android:layout_width="130dp"
+            android:gravity="center_vertical"
             android:layout_height="match_parent"
             android:layout_toRightOf="@+id/album">
 
@@ -49,20 +59,40 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <LinearLayout
+            android:layout_alignParentBottom="true"
             android:layout_toRightOf="@id/info"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:gravity="center"
             android:layout_height="match_parent">
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_play"/>
 
             <ImageButton
+
+                android:id="@+id/btn_pause"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_next"/>
+                android:layout_height="fill_parent"
+                android:background="@drawable/selector_music_btn"
+                android:padding="6.0dip"
+                android:src="@drawable/icon_pause_normal"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btn_play"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/selector_music_btn"
+                android:padding="6.0dp"
+                android:src="@drawable/icon_play_normal" />
+
+            <ImageButton
+                android:id="@+id/btn_playNext"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/btn_play"
+                android:background="@drawable/selector_music_btn"
+                android:padding="6.0dp"
+                android:src="@drawable/icon_next_normal" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
