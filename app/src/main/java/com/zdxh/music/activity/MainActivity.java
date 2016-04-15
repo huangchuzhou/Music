@@ -1,40 +1,39 @@
 package com.zdxh.music.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.ImageButton;
 
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.zdxh.music.R;
 import com.zdxh.music.fragment.LRCFragment;
 import com.zdxh.music.fragment.MainFragment;
 import com.zdxh.music.fragment.SearchFragment;
-import com.zdxh.music.util.DrawerAdapter;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     //设置tabLayout的每一个tab的标题
     private String[] mTitles;
+    //设置每个viewpager的fragment
     private ArrayList<Fragment> mFragments = new ArrayList<>();
+    //声明SlidingMenu
+    private SlidingMenu mSlidingMenu;
 
-    //抽屉菜单的listView adapter 根视图 draw_layout;
-    private ListView left_drawer;
-    private DrawerAdapter drawerAdapter;
-    private String[] mDrawerItemText;
-    private DrawerLayout draw_layout;
+    //侧滑菜单的启动按钮
+    private ImageButton btnMenu;
+
+
     private Fragment searchFragment;
     //设置每个tab所对应的Fragment
     @Override
@@ -42,17 +41,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         mTitles = getResources().getStringArray(R.array.main_panel_title);
-        mDrawerItemText = getResources().getStringArray(R.array.drawer_item);
+
         for (int i = 0; i<mTitles.length; i++){
 
             switch (mTitles[i]){
                 case "搜索":
                     searchFragment = new SearchFragment();
-
                     mFragments.add(searchFragment);
                     break;
                 case "发现":
@@ -64,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     mFragments.add(lrcFragment);
                     break;
             }
-
-
         }
         //初始化viewpager adapter tabLayout
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),mTitles,mFragments);
@@ -76,32 +69,45 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        //初始化根视图 draw_layout 抽屉菜单区域的 lisView 以及设置与之对应的 adapter
-        draw_layout = (DrawerLayout) findViewById(R.id.draw_layout);
-        left_drawer = (ListView) findViewById(R.id.left_drawer);
-        drawerAdapter = new DrawerAdapter(this,R.layout.drawer_list_item,mDrawerItemText);
-        left_drawer.setAdapter(drawerAdapter);
 
-        //left_drawer的列表点击事件
-        left_drawer.setOnItemClickListener(this);
+        //初始化SlidingMenu及定义其属性
+        mSlidingMenu = new SlidingMenu(this);
+        mSlidingMenu.setMode(SlidingMenu.LEFT);
+        mSlidingMenu.setBehindOffsetRes(R.dimen.sliding_menu_offset);
+        mSlidingMenu.attachToActivity(this,SlidingMenu.SLIDING_CONTENT);
+        mSlidingMenu.setMenu(R.layout.sildingmenu);
 
+        btnMenu = (ImageButton) findViewById(R.id.btnMenu);
+        btnMenu.setOnClickListener(this);
 
     }
-    //处理left_drawer的列表点击事件
+    //处理启动菜单按钮的回调事件
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        draw_layout.closeDrawer(left_drawer);
-
-        switch (mDrawerItemText[position]){
-            case "设置":
-                Intent intent = new Intent(MainActivity.this,SetAty.class);
-                startActivity(intent);
-            break;
-        }
-
+    public void onClick(View v) {
+        mSlidingMenu.toggle(true);  //slidingMenu切换菜单呈现一个切换效果
     }
 
+    //通过物理菜单键打开SlidingMenu菜单
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode){
+            case KeyEvent.KEYCODE_MENU:
+                mSlidingMenu.toggle(true);  //slidingMenu切换菜单呈现一个切换效果
+                break;
+
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    //通过物理返回键来关闭SlidingMenu菜单
+    @Override
+    public void onBackPressed() {
+        if (mSlidingMenu.isMenuShowing()){
+            mSlidingMenu.showContent();
+        }else {
+            super.onBackPressed();
+        }
+    }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         private String[] mTitles;
