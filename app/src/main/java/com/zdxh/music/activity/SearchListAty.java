@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.widget.ListView;
 
 import com.zdxh.music.R;
-import com.zdxh.music.bean.DataBean;
+import com.zdxh.music.bean.EntityBean;
 import com.zdxh.music.util.ArrayLengthCallBackListener;
 import com.zdxh.music.util.DataBeanAdapter;
 import com.zdxh.music.util.Search;
@@ -19,7 +19,8 @@ public class SearchListAty extends Activity {
     private ListView searchListView;
     private DataBeanAdapter adapter;
 
-    private ArrayList<DataBean> dataBeanList = new ArrayList<>();
+    private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +37,7 @@ public class SearchListAty extends Activity {
 
         try {
             Thread.sleep(1000);
-            adapter = new DataBeanAdapter(SearchListAty.this,R.layout.search_list_aty_item, dataBeanList);
+            adapter = new DataBeanAdapter(SearchListAty.this,R.layout.search_list_aty_item, entityBeanArrayList);
             searchListView.setAdapter(adapter);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -53,8 +54,9 @@ public class SearchListAty extends Activity {
         Search mSearch = new Search(searchName);
         mSearch.getData(new ArrayLengthCallBackListener() {
             @Override
-            public void info(ArrayList<DataBean> dataBean) {
-                dataBeanList = dataBean;
+            public void info(ArrayList<EntityBean> entityBeans) {
+                entityBeanArrayList = entityBeans;
+
             }
         });
 

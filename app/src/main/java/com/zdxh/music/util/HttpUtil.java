@@ -35,7 +35,7 @@ public class HttpUtil {
 					if (listener != null) {
 						listener.onFinish(builder.toString());
 					}
-					builder.toString();
+//					builder.toString();
 					
 				} catch (Exception e) {
 					e.printStackTrace();
