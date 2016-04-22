@@ -28,6 +28,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     private EditText etSearch;
     private ImageButton btnSearch;
     private String[] hotLabels = {"洋葱","那些年","See you Again","Every Time","小幸运","always"};
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+
         //此处的fragment与另一个activity进行通信
         Intent intent = new Intent(getActivity(), SearchListAty.class);
         intent.putExtra("searchName", etSearch.getText().toString());
@@ -78,6 +80,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
 
             getActivity().startActivity(intent);
         }
+
+
 
     }
 }

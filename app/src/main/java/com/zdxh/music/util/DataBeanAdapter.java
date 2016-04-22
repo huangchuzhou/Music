@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class DataBeanAdapter extends ArrayAdapter<EntityBean> {
     private int resourceID;
-    private int num = 0;
+
     public DataBeanAdapter(Context context, int resource, List<EntityBean> objects) {
         super(context, resource, objects);
         resourceID = resource;
@@ -36,41 +36,47 @@ public class DataBeanAdapter extends ArrayAdapter<EntityBean> {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        num++;
-        EntityBean mEntityBean = getItem(position);
+        MyViewHolder viewHolder;
         View view;
-        myViewHolder viewHolder;
-        if (convertView == null){
+        EntityBean mEntityBean = getItem(position);
+        Log.d("TAG",mEntityBean.toString());
+        List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
+
+        if (convertView == null) {
             //动态加载布局
             view = LayoutInflater.from(getContext()).inflate(resourceID, null);
-            viewHolder = new myViewHolder();
+            viewHolder = new MyViewHolder();
             viewHolder.singName = (TextView) view.findViewById(R.id.singName);
             viewHolder.songName = (TextView) view.findViewById(R.id.songName);
-            viewHolder.tvNum = (TextView)view.findViewById(R.id.tvNum);
+            viewHolder.tvNum = (TextView) view.findViewById(R.id.tvNum);
             viewHolder.tvList_Duration = (TextView) view.findViewById(R.id.tvList_Duration);
             view.setTag(viewHolder);
-        }else {
+
+        } else {
+
             view = convertView;
-            viewHolder = (myViewHolder) view.getTag();
+            viewHolder = (MyViewHolder) view.getTag();
         }
 
-        //给SearchListAty上的布局控件指定值
-        viewHolder.tvNum.setText(num+"");
-        List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
-        EntityBean.DataBean mDataBean = dataBeanList.get(num - 1);
-        List<EntityBean.DataBean.AuditionListBean> auditionListBeanList = mDataBean.getAudition_list();
-        EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(0);
-        viewHolder.songName.setText(mDataBean.getSong_name());
-        viewHolder.singName.setText(mDataBean.getSinger_name());
-        viewHolder.tvList_Duration.setText(mAuditionListBean.getDuration());
+
+
+            EntityBean.DataBean mDataBean = dataBeanList.get(position);
+            viewHolder.tvNum.setText(position+1+"");
+            List<EntityBean.DataBean.AuditionListBean> auditionListBeanList = mDataBean.getAudition_list();
+            EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(position);
+            viewHolder.songName.setText(mDataBean.getSong_name());
+            viewHolder.singName.setText(mDataBean.getSinger_name());
+            viewHolder.tvList_Duration.setText(mAuditionListBean.getDuration());
+
 
         return view;
     }
 
-    class myViewHolder{
+    class MyViewHolder{
         TextView tvNum;
         TextView songName;
         TextView singName;
         TextView tvList_Duration;
+
     }
 }

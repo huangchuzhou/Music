@@ -1,98 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:background="@drawable/sliding_bg"
+    android:orientation="vertical"
     android:layout_height="match_parent">
-    <ScrollView
-        android:id="@+id/sv"
-        android:layout_width="match_parent"
-        android:layout_height="350dp">
+
         <ListView
             android:id="@+id/lvLRC"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
-
-    </ScrollView>
-
-
-    <RelativeLayout
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/sv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/main_album"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/album" />
+            android:layout_height="400dp"></ListView>
 
 
 
+        <RelativeLayout
 
-        <LinearLayout
-            android:layout_alignParentBottom="true"
-            android:id="@+id/info"
-            android:orientation="vertical"
-            android:layout_width="130dp"
-            android:gravity="center_vertical"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@+id/album">
-
-            <TextView
-                android:padding="5dp"
-                android:id="@+id/tvSingerName"
-                android:text="歌手"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:padding="5dp"
-                android:id="@+id/tvSongName"
-                android:text="歌名"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:padding="5dp"
-                android:id="@+id/tvDuration"
-                android:text="时长"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@id/info"
+            android:layout_below="@id/lvLRC"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/music_icon"
+                    android:layout_width="100dp"
+                    android:layout_height="90dp"
+                    android:id="@+id/album"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    />
+                <LinearLayout
+                    android:layout_alignParentBottom="true"
+                    android:id="@+id/info"
+                    android:orientation="vertical"
+                    android:layout_width="120dp"
+                    android:gravity="center_vertical"
+                    android:layout_height="90dp"
+                    android:layout_toRightOf="@+id/album">
 
-            <ImageButton
+                        <TextView
+                            android:padding="5dp"
+                            android:id="@+id/tvSingerName"
+                            android:text="歌手"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                        <TextView
+                            android:padding="5dp"
+                            android:id="@+id/tvSongName"
+                            android:text="歌名"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
 
-                android:id="@+id/btn_pause"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:background="@drawable/selector_music_btn"
-                android:padding="6.0dip"
-                android:src="@drawable/icon_pause_normal"
-                android:visibility="gone" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_alignParentBottom="true"
+                    android:layout_toRightOf="@id/info"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_height="90dp">
 
-            <ImageButton
-                android:id="@+id/btn_play"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@drawable/selector_music_btn"
-                android:padding="6.0dp"
-                android:src="@drawable/icon_play_normal" />
+                        <ImageButton
+                            android:id="@+id/btnPlay"
+                            android:padding="10dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/icon_play_normal"
+                            />
 
-            <ImageButton
-                android:id="@+id/btn_playNext"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/btn_play"
-                android:background="@drawable/selector_music_btn"
-                android:padding="6.0dp"
-                android:src="@drawable/icon_next_normal" />
-        </LinearLayout>
-    </RelativeLayout>
-</RelativeLayout>
+
+
+                        <ImageButton
+                            android:id="@+id/btnLove"
+                            android:padding="10dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/ic_favorite_border_red_500_18dp" />
+
+
+                </LinearLayout>
+        </RelativeLayout>
+
+</LinearLayout>

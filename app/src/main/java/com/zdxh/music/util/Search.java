@@ -1,7 +1,12 @@
 package com.zdxh.music.util;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.zdxh.music.bean.EntityBean;
+import com.zdxh.music.bean.ImageBean;
+import com.zdxh.music.db.MusicDB;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -30,32 +35,77 @@ public class Search {
         }
         return encodeSearchName;
     }
-    public void getData(final ArrayLengthCallBackListener infoListener) {
+    //获取EntityBeanData
+    //http://search.dongting.com/song/search/old?q=%E7%8E%8B%E8%8F%B2&page=1&size=20
+    public void getEntityBeanData(final Context mContext, final EntityBeanBackListener infoListener) {
+        final MusicDB musicDB = MusicDB.getInstance(mContext);
 
-        String url = "http://search.dongting.com/song/search/old?q="+encodeSearchName(searchName);
+        final String songUrl = "http://search.dongting.com/song/search/old?q="+encodeSearchName(searchName)+"&page=1&size=20";
+        //如果数据库不存在这条数据
+        if (!musicDB.isExists(songUrl)){
 
-        //使用Gson解析json数据
-        final Gson gson = new Gson();
-        HttpUtil.parseJson(url, new HttpCallbackListener() {
-            @Override
-            public void onFinish(String responce) {
+            //使用Gson解析json数据
+            final Gson gson = new Gson();
 
-                EntityBean mEntityBean = gson.fromJson(responce,EntityBean.class);
+            //此处搜索获得的是 EntityBean songUrl
+            HttpUtil.parseJson(songUrl, new HttpCallbackListener() {
+                @Override
+                public void onFinish(String responce) {
 
-                List<EntityBean.DataBean> mDataBean = mEntityBean.getData();
-                //获取EntityBean.DataBean集合的长度用于调用info这个方法来动态增长SearchListAty的item;
-                for (int i = 0; i<mDataBean.size(); i++){
-                    entityBeanArrayList.add(mEntityBean);
-                    infoListener.info(entityBeanArrayList);
+                    EntityBean mEntityBean = gson.fromJson(responce,EntityBean.class);
+
+
+                    List<EntityBean.DataBean> mDataBeanList = mEntityBean.getData();
+
+
+
+                    for (int i = 0; i<mDataBeanList.size();i++){
+
+                        EntityBean.DataBean dataBean = mDataBeanList.get(i);
+
+                        //先判断能否存储到数据库中
+                        if (!musicDB.isExistSongId(dataBean.getSong_id())){
+
+                            //将EntityBean.DataBean解析的数据存储到数据库
+                            mEntityBean.setSong(songUrl);
+                            musicDB.saveEntityBean(mEntityBean);
+                            //从数据库中加载数据
+                            infoListener.info(musicDB.loadEntityBean(songUrl));
+                        }
+
+                    }
 
                 }
+                @Override
+                public void onError(Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }else {  //若存在这条数据
+            infoListener.info(musicDB.loadEntityBean(songUrl));
+        }
 
-            }
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-            }
-        });
 
     }
+
+    //获取ImageBeanData
+    public void getImageBeanData(final Context mContext, final ImageBeanCallBackListener infoListener){
+        final String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeSearchName(searchName);
+
+            final Gson gson = new Gson();
+            HttpUtil.parseJson(imageUrl, new HttpCallbackListener() {
+                @Override
+                public void onFinish(String responce) {
+                    ImageBean mImageBean = gson.fromJson(responce, ImageBean.class);
+                    infoListener.info(imageUrl, mImageBean);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    e.printStackTrace();
+                }
+            });
+    }
+
+
 }

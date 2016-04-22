@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.SetAty"></activity>
+        <service android:name=".service.MediaService"></service>
     </application>
 
 </manifest>
