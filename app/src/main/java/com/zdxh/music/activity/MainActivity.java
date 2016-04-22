@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //自定义弹出窗口类
     private InfoWindow mInfoWindow;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +107,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+
+
     }
+
+
 
     //为弹出窗口实现监听类
     private View.OnClickListener itemsOnClick = new View.OnClickListener(){
@@ -193,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return mTitles[position];
         }
     }
+
 
 
 }

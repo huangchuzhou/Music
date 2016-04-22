@@ -1,7 +1,6 @@
 package com.zdxh.music.util;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.zdxh.music.bean.EntityBean;

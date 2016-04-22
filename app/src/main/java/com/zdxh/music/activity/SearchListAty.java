@@ -41,7 +41,9 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     private TextView tvSingerName;
     private TextView tvSongName;
     private String songUrl;
-    private boolean isPause = false;
+    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl）
+    private static String[] data = new String[4];
+    public static boolean isPause = false;
 
     private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
 
@@ -92,7 +94,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     private void initDataBean() {
 
         String searchName = getIntent().getStringExtra("searchName");
-
+        data[3] = searchName;
         Search mSearch = new Search(searchName);
 
         mSearch.getEntityBeanData(getApplicationContext(),new EntityBeanBackListener() {
@@ -186,20 +188,24 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
 
 
         tvSingerName.setText(mDataBean.getSinger_name());
+        data[0] = mDataBean.getSinger_name();  //data数组第一项保存SingerName
 
         tvSongName.setText(mDataBean.getSong_name());
+        data[1] = mDataBean.getSong_name();  //data数组第二项保存SongName
 
         List<EntityBean.DataBean.AuditionListBean> auditionListBeanList = mDataBean.getAudition_list();
-        //只取三条url数据的第一条
+
         EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(position);
 
         songUrl = mAuditionListBean.getUrl();
+        data[2] = songUrl;   //data数组第三项保存songUrl
 
         //传递songUrl给MediaService
         Intent intent = new Intent(SearchListAty.this, MediaService.class);
         intent.putExtra("songUrl",songUrl);
         intent.setAction(MediaService.PLAY);
         btnPlay.setImageResource(R.drawable.icon_pause_normal);
+        isPause = true;
         startService(intent);
     }
 
@@ -207,15 +213,16 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     public void onClick(View v) {
 
         Intent intent = new Intent(SearchListAty.this, MediaService.class);
-        if (isPause == false){
-            btnPlay.setImageResource(R.drawable.icon_pause_normal);
-            isPause = true;
+        if (isPause == true){
+            btnPlay.setImageResource(R.drawable.icon_play_normal);
+            isPause = false;
+
             intent.putExtra("songUrl",songUrl);
             intent.setAction(MediaService.PLAY);
             startService(intent);
         }else {
-            btnPlay.setImageResource(R.drawable.icon_play_normal);
-            isPause = false;
+            btnPlay.setImageResource(R.drawable.icon_pause_normal);
+            isPause = true;
             intent.putExtra("songUrl",songUrl);
             intent.setAction(MediaService.PAUSE);
             startService(intent);
@@ -224,6 +231,9 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
 
     }
 
-
+    public static String[] returnData()
+    {
+        return data;
+    }
 }
 
