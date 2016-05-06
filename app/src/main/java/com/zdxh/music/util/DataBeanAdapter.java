@@ -1,7 +1,6 @@
 package com.zdxh.music.util;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +38,7 @@ public class DataBeanAdapter extends ArrayAdapter<EntityBean> {
         MyViewHolder viewHolder;
         View view;
         EntityBean mEntityBean = getItem(position);
-        Log.d("TAG",mEntityBean.toString());
+
         List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
 
         if (convertView == null) {

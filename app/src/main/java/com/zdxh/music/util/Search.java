@@ -91,19 +91,21 @@ public class Search {
     public void getImageBeanData(final Context mContext, final ImageBeanCallBackListener infoListener){
         final String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeSearchName(searchName);
 
-            final Gson gson = new Gson();
-            HttpUtil.parseJson(imageUrl, new HttpCallbackListener() {
-                @Override
-                public void onFinish(String responce) {
-                    ImageBean mImageBean = gson.fromJson(responce, ImageBean.class);
-                    infoListener.info(imageUrl, mImageBean);
-                }
+        final Gson gson = new Gson();
+        HttpUtil.parseJson(imageUrl, new HttpCallbackListener() {
+            @Override
+            public void onFinish(String response) {
+                ImageBean mImageBean = gson.fromJson(response, ImageBean.class);
+                String singerName = searchName;
+                infoListener.info(imageUrl,singerName,mImageBean);
+            }
 
-                @Override
-                public void onError(Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
 

@@ -30,7 +30,7 @@ import java.net.URLEncoder;
 public class LRCFragment extends Fragment {
     private View view;
     private LocalReceiver localReceiver;
-    private ImageButton btnPlay;
+    private ImageButton btnPlay,btnLove;
     private TextView tvSongName,tvSingerName;
     private String[] data;
     private ImageView album;
@@ -53,6 +53,7 @@ public class LRCFragment extends Fragment {
         data = SearchListAty.returnData();
         view = inflater.inflate(R.layout.lrc_fragment_layout,container,false);
         btnPlay = (ImageButton) view.findViewById(R.id.btnPlay);
+        btnLove = (ImageButton) view.findViewById(R.id.btnLove);
         tvSingerName = (TextView) view.findViewById(R.id.tvSingerName);
         tvSongName = (TextView) view.findViewById(R.id.tvSongName);
         album = (ImageView) view.findViewById(R.id.album);
@@ -63,18 +64,22 @@ public class LRCFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (MediaService.RECEIVERPLAY.equals(intent.getAction())){
-                Log.d("TAG",intent.getAction());
+            if (MediaService.RECEIVERPLAY.equals(intent.getAction())&&MediaService.isFinish==false){
+                if (SearchListAty.isLove){
+                    btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
+                    SearchListAty.isLove = false;
+                }
                 //从活动中获取相应Fragment的实例 更改button 的样式
                 btnPlay.setImageResource(R.drawable.icon_pause_normal);
                 SearchListAty.isPause = false;
                 btnPlay.setOnClickListener(this);
+                btnLove.setOnClickListener(this);
                 tvSingerName.setText(data[0]);
-                Log.d("TAG",tvSingerName.toString());
+
                 tvSongName.setText(data[1]);
 
                 //从数据库中加载图片
-                String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeName(data[3]);
+                String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeName(data[0]);
 
 
                 if (MusicDB.musicDB.loadImage(imageUrl)!=null){
@@ -82,36 +87,53 @@ public class LRCFragment extends Fragment {
                     album.setImageBitmap(MusicDB.musicDB.loadImage(imageUrl));
 
                 }
+            }else {
+                btnPlay.setImageResource(R.drawable.icon_play_normal);
+                MediaService.isFinish = false;
+                SearchListAty.isPause = true;
             }
         }
 
         @Override
         public void onClick(View v) {
+            switch (v.getId()){
+                case R.id.btnPlay:
+                    if (SearchListAty.isPause == false){
+                        btnPlay.setImageResource(R.drawable.icon_play_normal);
+                        SearchListAty.isPause = true;
 
-            if (SearchListAty.isPause == false){
-                btnPlay.setImageResource(R.drawable.icon_play_normal);
-                SearchListAty.isPause = true;
+                        Intent intentPause = new Intent(getActivity(),MediaService.class);
+                        intentPause.putExtra("songUrl",data[2]);
 
-                Intent intentPause = new Intent(getActivity(),MediaService.class);
-                intentPause.putExtra("songUrl",data[2]);
+                        intentPause.setAction(MediaService.PAUSE);
+                        getActivity().startService(intentPause);
 
-                intentPause.setAction(MediaService.PAUSE);
-                getActivity().startService(intentPause);
+                    }else if (SearchListAty.isPause == true){
+                        btnPlay.setImageResource(R.drawable.icon_pause_normal);
+                        SearchListAty.isPause = false;
 
-            }else if (SearchListAty.isPause == true){
-                btnPlay.setImageResource(R.drawable.icon_pause_normal);
-                SearchListAty.isPause = false;
-
-                Intent intentPlay = new Intent(getActivity(),MediaService.class);
-                intentPlay.putExtra("songUrl",data[2]);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                intentPlay.setAction(MediaService.PLAY);
-                getActivity().startService(intentPlay);
+                        Intent intentPlay = new Intent(getActivity(),MediaService.class);
+                        intentPlay.putExtra("songUrl",data[2]);
+//                        try {
+//                            Thread.sleep(100);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+                        intentPlay.setAction(MediaService.PLAY);
+                        getActivity().startService(intentPlay);
+                    }
+                    break;
+                case R.id.btnLove:
+                    if (SearchListAty.isLove == false){
+                        btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
+                        SearchListAty.isLove = true;
+                    }else {
+                        btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
+                        SearchListAty.isLove = false;
+                    }
+                    break;
             }
+
         }
     }
 

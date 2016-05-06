@@ -23,7 +23,8 @@
             <ImageButton
                 android:id="@+id/btnMenu"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/ic_drawer_home"
+                android:src="@drawable/ic_drawer_home"
+                android:background="@android:color/transparent"
                 android:layout_width="30dp"
                 android:layout_height="30dp" />
 
@@ -38,7 +39,8 @@
             <ImageButton
                 android:id="@+id/btnInfo"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/ic_info_outline_white_18dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_info_outline_white_18dp"
                 android:layout_width="30dp"
                 android:layout_height="30dp" />
 
