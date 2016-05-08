@@ -58,23 +58,28 @@
             android:text="推荐在听"
             android:padding="5dp"
             android:textSize="20sp"/>
-
-        <ImageButton
-            android:id="@+id/btnMore"
-            android:padding="5dp"
+        <LinearLayout
             android:layout_alignParentRight="true"
-            android:background="@android:color/transparent"
+            android:id="@+id/more"
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_keyboard_arrow_right_red_100_18dp"/>
-        <TextView
-            android:layout_toLeftOf="@id/btnMore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:text="更多"/>
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="更多"/>
+            <ImageButton
+                android:id="@+id/btnMore"
+                android:padding="5dp"
+                android:layout_alignParentRight="true"
+                android:background="@android:color/transparent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_keyboard_arrow_right_red_100_18dp"/>
+        </LinearLayout>
     </RelativeLayout>
 
     <LinearLayout
@@ -85,9 +90,12 @@
 
         <ListView
             android:id="@+id/enjoyList"
-            android:divider="@android:color/transparent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
+            android:layout_height="wrap_content"
+            android:divider="@android:color/transparent">
+
+        </ListView>
+
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="1dp"

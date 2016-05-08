@@ -8,12 +8,15 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,7 +41,7 @@ import java.util.List;
 /**
  * Created by huangchuzhou on 2016/4/8.
  */
-public class SearchListAty extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener {
+public class SearchListAty extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener, AdapterView.OnItemLongClickListener {
     private ListView searchListView;
     private DataBeanAdapter adapter;
 
@@ -48,8 +51,10 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     private TextView tvSingerName;
     private TextView tvSongName;
     private String songUrl;
-
-
+    //此标志位用于获取searchListView item的点击位置，用于MainFragment的enjoyList item 对应的songUrl
+    public static int songUrlLocation = -1;
+    //标志此歌是否被收藏
+    public static boolean isCollection = false;
 
     //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl）
     private static String[] data = new String[4];
@@ -57,7 +62,8 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     public static boolean isLove = false;
     public FinishReceiver mFinishReceiver = null;
     private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
-
+    public static int currentPosition = -1;
+    public static boolean isFromSearchListAty = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         btnLove.setOnClickListener(this);
 
         searchListView.setOnItemClickListener(this);
+        searchListView.setOnItemLongClickListener(this);
 
         //注册finish广播接收器
         mFinishReceiver = new FinishReceiver();
@@ -139,6 +146,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                     album.setImageBitmap(bitmap);
                 }else {
                     album.setImageBitmap(MusicDB.musicDB.loadImage(imageUrl));
+
                 }
             }
         });
@@ -179,6 +187,10 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        btnPlay.setClickable(true);
+        isCollection = false;
+        isFromSearchListAty = true;
+        songUrlLocation = position;
 
         EntityBean mEntityBean = entityBeanArrayList.get(position);
 
@@ -186,7 +198,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         final EntityBean.DataBean mDataBean = dataBeanList.get(position);
 
         MusicApplication.getEnjoy().add(mDataBean);
-
 
         if (MusicApplication.getEnjoy().size()>0){
             Intent intent = new Intent();
@@ -249,10 +260,47 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         Intent intent = new Intent(SearchListAty.this, MediaService.class);
         intent.putExtra("songUrl",songUrl);
         intent.setAction(MediaService.PLAY);
-        btnPlay.setImageResource(R.drawable.icon_pause_normal);
+        btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_brown_100_18dp);
         isPause = false;
         startService(intent);
 
+        if (isCollection==true){
+            btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
+
+        }else{
+            btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
+        }
+
+    }
+
+
+
+    public static String[] returnData()
+    {
+        return data;
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        currentPosition = position;
+        EntityBean mEntityBean = entityBeanArrayList.get(position);
+        List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
+        EntityBean.DataBean dataBean = dataBeanList.get(position);
+        LayoutInflater inflater = LayoutInflater.from(SearchListAty.this);
+        View mView = inflater.inflate(R.layout.search_list_aty_item,null);
+        LinearLayout collection = (LinearLayout) mView.findViewById(R.id.item_collection);
+        collection.setOnClickListener(this);
+        if (isCollection==true){
+            //收藏这首歌
+            MusicApplication.getDataBeensCollection().add(dataBean);
+            btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
+            isLove = true;
+        }else{
+            btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
+            isLove = false;
+        }
+        adapter.notifyDataSetChanged();
+        return true;
     }
 
     @Override
@@ -261,50 +309,46 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
             case R.id.btnPlay:
                 Intent intent = new Intent(SearchListAty.this, MediaService.class);
                 if (isPause == false){
-                    btnPlay.setImageResource(R.drawable.icon_play_normal);
+                    btnPlay.setImageResource(R.drawable.ic_play_circle_outline_brown_100_18dp);
                     isPause = true;
-
                     intent.putExtra("songUrl",songUrl);
                     intent.setAction(MediaService.PAUSE);
                     startService(intent);
                 }else {
-                    btnPlay.setImageResource(R.drawable.icon_pause_normal);
+                    btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_brown_100_18dp);
                     isPause = false;
                     intent.putExtra("songUrl",songUrl);
                     intent.setAction(MediaService.PLAY);
                     startService(intent);
                 }
-
                 break;
-
             case R.id.btnLove:
                 if (isLove == false){
                     btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
                     isLove = true;
+                    isCollection = true;
                 }else {
                     btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
                     isLove = false;
+                    isCollection = false;
                 }
+                break;
+            case R.id.item_collection:
+                isCollection = true;
+                isLove = true;
+                Toast.makeText(SearchListAty.this,"已收藏",Toast.LENGTH_SHORT).show();
+                adapter.notifyDataSetChanged();
                 break;
         }
     }
-
-    public static String[] returnData()
-    {
-        return data;
-    }
-
 
     class FinishReceiver extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(MediaService.RECEIVERFINISH)){
-                btnPlay.setImageResource(R.drawable.icon_play_normal);
+                btnPlay.setImageResource(R.drawable.ic_play_circle_outline_brown_100_18dp);
             }
         }
     }
-
-
 }
-

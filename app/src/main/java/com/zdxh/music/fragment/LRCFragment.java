@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,35 +59,48 @@ public class LRCFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
     class LocalReceiver extends BroadcastReceiver implements View.OnClickListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            String imageUrl;
             if (MediaService.RECEIVERPLAY.equals(intent.getAction())&&MediaService.isFinish==false){
                 if (SearchListAty.isLove){
                     btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
-                    SearchListAty.isLove = false;
                 }
                 //从活动中获取相应Fragment的实例 更改button 的样式
-                btnPlay.setImageResource(R.drawable.icon_pause_normal);
+                btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_brown_100_18dp);
                 SearchListAty.isPause = false;
                 btnPlay.setOnClickListener(this);
                 btnLove.setOnClickListener(this);
-                tvSingerName.setText(data[0]);
-
-                tvSongName.setText(data[1]);
-
-                //从数据库中加载图片
-                String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeName(data[0]);
-
+                if (SearchListAty.isFromSearchListAty == true){
+                    tvSingerName.setText(data[0]);
+                    tvSongName.setText(data[1]);
+                    //从数据库中加载图片
+                    imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeName(data[0]);
+                    SearchListAty.isFromSearchListAty = false;
+                }else {
+                    tvSingerName.setText(MainFragment.returnData()[0]);
+                    tvSongName.setText(MainFragment.returnData()[1]);
+                    //从数据库中加载图片
+                    imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeName(MainFragment.returnData()[0]);
+                }
 
                 if (MusicDB.musicDB.loadImage(imageUrl)!=null){
 
                     album.setImageBitmap(MusicDB.musicDB.loadImage(imageUrl));
 
+                }else {
+                    album.setImageResource(R.drawable.music_icon);
                 }
             }else {
-                btnPlay.setImageResource(R.drawable.icon_play_normal);
+                btnPlay.setImageResource(R.drawable.ic_play_circle_outline_brown_100_18dp);
                 MediaService.isFinish = false;
                 SearchListAty.isPause = true;
             }
@@ -99,7 +111,7 @@ public class LRCFragment extends Fragment {
             switch (v.getId()){
                 case R.id.btnPlay:
                     if (SearchListAty.isPause == false){
-                        btnPlay.setImageResource(R.drawable.icon_play_normal);
+                        btnPlay.setImageResource(R.drawable.ic_play_circle_outline_brown_100_18dp);
                         SearchListAty.isPause = true;
 
                         Intent intentPause = new Intent(getActivity(),MediaService.class);
@@ -109,16 +121,10 @@ public class LRCFragment extends Fragment {
                         getActivity().startService(intentPause);
 
                     }else if (SearchListAty.isPause == true){
-                        btnPlay.setImageResource(R.drawable.icon_pause_normal);
+                        btnPlay.setImageResource(R.drawable.ic_pause_circle_outline_brown_100_18dp);
                         SearchListAty.isPause = false;
-
                         Intent intentPlay = new Intent(getActivity(),MediaService.class);
                         intentPlay.putExtra("songUrl",data[2]);
-//                        try {
-//                            Thread.sleep(100);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
                         intentPlay.setAction(MediaService.PLAY);
                         getActivity().startService(intentPlay);
                     }

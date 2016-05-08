@@ -1,60 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_height="match_parent">
 
 
-
     <LinearLayout
-        android:layout_width="19dp"
-        android:orientation="vertical"
-        android:layout_centerInParent="true"
-        android:layout_height="43dp">
-        <TextView
-            android:text="1"
-            android:id="@+id/tvNum"
-            android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <LinearLayout
             android:layout_width="19dp"
-            android:layout_height="43dp" />
+            android:orientation="vertical"
+            android:layout_centerInParent="true"
+            android:layout_height="43dp">
+            <TextView
+                android:text="1"
+                android:id="@+id/tvNum"
+                android:gravity="center"
+                android:layout_width="19dp"
+                android:layout_height="43dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_centerInParent="true"
+            android:layout_height="wrap_content">
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Large Text"
+                android:id="@+id/songName" />
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Small Text"
+                android:id="@+id/singName" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="70dp"
+            android:orientation="vertical"
+            android:layout_centerInParent="true"
+            android:layout_height="43dp">
+            <TextView
+                android:text="1"
+                android:id="@+id/tvList_Duration"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="43dp" />
+        </LinearLayout>
     </LinearLayout>
-
     <LinearLayout
-        android:layout_weight="1"
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerInParent="true"
-        android:layout_height="wrap_content">
+        android:id="@+id/layout_other"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@android:color/holo_red_light"
+        android:orientation="horizontal"
+        android:visibility="gone" >
 
-        <TextView
-
+        <LinearLayout
+            android:id="@+id/item_collection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Large Text"
-            android:id="@+id/songName" />
+            android:layout_weight="1"
 
-        <TextView
+            android:clickable="false"
+            android:orientation="vertical" >
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_favorite_border_white_18dp"
+                android:background="@android:color/transparent"
+                android:gravity="right|center_vertical" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:text="收藏"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/item_add"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
-            android:id="@+id/singName" />
+            android:layout_weight="1"
+            android:clickable="false"
+            android:orientation="vertical" >
 
-    </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_note_add_white_18dp"
+                android:background="@android:color/transparent"
+                android:gravity="right|center_vertical" />
 
-    <LinearLayout
-        android:layout_width="70dp"
-        android:orientation="vertical"
-        android:layout_centerInParent="true"
-        android:layout_height="43dp">
-        <TextView
-            android:text="1"
-            android:id="@+id/tvList_Duration"
-            android:gravity="center"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:text="加入歌单"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/item_download"
             android:layout_width="match_parent"
-            android:layout_height="43dp" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_cloud_download_white_18dp"
+                android:background="@android:color/transparent"
+                android:gravity="right|center_vertical" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:text="下载"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/item_share"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/ic_share_white_18dp"
+                android:gravity="right|center_vertical" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:text="分享"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
