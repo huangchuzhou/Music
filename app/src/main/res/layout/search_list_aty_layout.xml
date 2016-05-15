@@ -5,12 +5,21 @@
     android:orientation="vertical"
     android:layout_height="match_parent">
 
-
-    <ListView
-
-        android:id="@+id/search_listView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="400dp"></ListView>
+        android:layout_height="400dp">
+        <ListView
+            android:visibility="invisible"
+            android:id="@+id/search_listView"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"></ListView>
+        <TextView android:id="@+id/networkInfo"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:text="当前木有网络...无法获取数据"/>
+    </FrameLayout>
 
     <RelativeLayout
 
@@ -29,7 +38,7 @@
             android:layout_alignParentBottom="true"
             android:id="@+id/info"
             android:orientation="vertical"
-            android:layout_width="120dp"
+            android:layout_width="130dp"
             android:gravity="center_vertical"
             android:layout_height="90dp"
             android:layout_toRightOf="@+id/album">
@@ -37,12 +46,16 @@
                 android:padding="5dp"
                 android:id="@+id/tvSongName"
                 android:text="歌名"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
                 android:padding="5dp"
                 android:id="@+id/tvSingerName"
                 android:text="歌手"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -55,25 +68,31 @@
             android:orientation="horizontal"
             android:gravity="center"
             android:layout_height="90dp">
+            <ImageButton
+                android:id="@+id/btnPrevious"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_skip_previous_white_18dp"
+                />
 
             <ImageButton
                 android:id="@+id/btnPlay"
                 android:padding="10dp"
-                android:clickable="false"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_play_circle_outline_brown_100_18dp"
+                android:src="@drawable/ic_play_arrow_white_18dp"
                 />
-
             <ImageButton
-                android:id="@+id/btnLove"
+                android:id="@+id/btnNext"
                 android:padding="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_favorite_border_red_500_18dp" />
-
+                android:src="@drawable/ic_skip_next_white_18dp"
+                />
 
         </LinearLayout>
     </RelativeLayout>

@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal">
         <LinearLayout
-            android:layout_width="19dp"
+            android:layout_width="25dp"
             android:orientation="vertical"
             android:layout_centerInParent="true"
             android:layout_height="43dp">

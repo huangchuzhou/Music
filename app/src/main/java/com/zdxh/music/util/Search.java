@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.zdxh.music.bean.EntityBean;
+import com.zdxh.music.bean.GeCiBean;
 import com.zdxh.music.bean.ImageBean;
 import com.zdxh.music.db.MusicDB;
 
@@ -22,6 +23,9 @@ public class Search {
     private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
     public Search(String searchName){
         this.searchName = searchName;
+    }
+
+    public Search() {
     }
 
     //对输入的包含中文信息的语句进行编码
@@ -106,6 +110,25 @@ public class Search {
             }
         });
 
+    }
+    //获取歌词数据
+    public void getLrcBeanData(EntityBean.DataBean dataBean, final GeCiBeanCallBackListener infoListener){
+        String LrcUrl = "http://geci.me/api/lyric/"+encodeSearchName(dataBean.getSong_name())+"/"+encodeSearchName(dataBean.getSinger_name());
+
+        final Gson gson = new Gson();
+        HttpUtil.parseJson(LrcUrl, new HttpCallbackListener() {
+            @Override
+            public void onFinish(String responce) {
+
+                GeCiBean geCiBean = gson.fromJson(responce,GeCiBean.class);
+                infoListener.info(geCiBean);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 

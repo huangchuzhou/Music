@@ -12,8 +12,6 @@ import com.zdxh.music.R;
 import com.zdxh.music.bean.EntityBean;
 import com.zdxh.music.db.MusicDB;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -59,14 +57,11 @@ public class EnjoyAdapter extends ArrayAdapter<EntityBean.DataBean> {
         }
         // TODO: 2016/5/6 这里的列表长度取决于databean的长度，有可能出现数组越界异常 
         viewHolder.tvNum.setText(position+1+"");
-        List<EntityBean.DataBean.AuditionListBean> auditionListBeanList = mDataBean.getAudition_list();
-        EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(position);
         viewHolder.songName.setText(mDataBean.getSong_name());
         viewHolder.singName.setText(mDataBean.getSinger_name());
         String singerName = mDataBean.getSinger_name();
-        String imageUrl = "http://lp.music.ttpod.com/pic/down?artist="+encodeSearchName(singerName);
-        if (MusicDB.musicDB.isExistsImage(imageUrl)){
-            viewHolder.ivAlbum.setImageBitmap(MusicDB.musicDB.loadImage(imageUrl));
+        if (MusicDB.musicDB.isExistsImage(singerName)){
+            viewHolder.ivAlbum.setImageBitmap(MusicDB.musicDB.loadImage(singerName));
         }else {
             viewHolder.ivAlbum.setImageResource(R.drawable.music_icon);
         }
@@ -78,14 +73,5 @@ public class EnjoyAdapter extends ArrayAdapter<EntityBean.DataBean> {
         TextView songName;
         TextView singName;
         ImageView ivAlbum;
-    }
-    private String encodeSearchName(String searchName){
-        String encodeSearchName = null;
-        try {
-            encodeSearchName = URLEncoder.encode(searchName, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return encodeSearchName;
     }
 }

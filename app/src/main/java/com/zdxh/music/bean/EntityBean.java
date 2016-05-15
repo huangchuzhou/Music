@@ -1,11 +1,12 @@
 package com.zdxh.music.bean;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by huangchuzhou on 2016/4/16.
  */
-public class EntityBean {
+public class EntityBean implements Serializable{
 
     /**
      * vip : 0
@@ -43,7 +44,7 @@ public class EntityBean {
         this.data = data;
     }
 
-    public static class DataBean {
+    public static class DataBean implements Serializable {
         private int song_id;
         private String song_name;
         private int singer_id;
@@ -139,7 +140,7 @@ public class EntityBean {
             this.audition_list = audition_list;
         }
 
-        public static class AuditionListBean {
+        public static class AuditionListBean implements Serializable{
             private String duration;
             private String typeDescription;
             private String url;

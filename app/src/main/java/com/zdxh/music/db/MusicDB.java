@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class MusicDB {
     private DBHelper mDBHelper;
-    private SQLiteDatabase db;
+    public SQLiteDatabase db;
     public static MusicDB musicDB;
     private Context mContext;
     public MusicDB(Context context) {
@@ -81,6 +81,7 @@ public class MusicDB {
                 EntityBean.DataBean mDataBean = new EntityBean.DataBean();
                 EntityBean.DataBean.AuditionListBean mAuditionListBean = new EntityBean.DataBean.AuditionListBean();
                 mDataBean.setSong_name(cursor.getString(cursor.getColumnIndex("song_name")));
+                mDataBean.setSong_id(cursor.getInt(cursor.getColumnIndex("song_id")));
                 mDataBean.setSinger_name(cursor.getString(cursor.getColumnIndex("singer_name")));
                 mAuditionListBean.setDuration(cursor.getString(cursor.getColumnIndex("duration")));
                 mAuditionListBean.setSize(cursor.getString(cursor.getColumnIndex("size")));
@@ -124,11 +125,22 @@ public class MusicDB {
      * 将GeCiBean.ResultBean实例存储到数据库
      * lrc
      */
-    public void saveResultBean(GeCiBean.ResultBean mResultBean){
+
+    /**
+     * aid : 2848529
+     * lrc : http://s.geci.me/lrc/344/34435/3443588.lrc
+     * song : 海阔天空
+     * artist_id : 2
+     * sid : 3443588
+     */
+    public void saveResultBean(GeCiBean.ResultBean mResultBean, EntityBean.DataBean dataBean){
         if (mResultBean != null){
             ContentValues values = new ContentValues();
             values.put("lrcUrl",mResultBean.getLrc());
-            db.insert("entity",null,values);
+            values.put("songName",mResultBean.getSong());
+            values.put("singerName",dataBean.getSinger_name());
+            values.put("aid",mResultBean.getAid());
+            db.insert("geci",null,values);
         }
     }
 
@@ -139,10 +151,13 @@ public class MusicDB {
     public List<GeCiBean.ResultBean> loadResultBeans(){
         List<GeCiBean.ResultBean> resultBeanList = new ArrayList<>();
         GeCiBean.ResultBean mResultBean = new GeCiBean.ResultBean();
-        Cursor cursor = db.query("entity",null,null,null,null,null,null);
+        Cursor cursor = db.query("geci",null,null,null,null,null,null);
         if (cursor.moveToFirst()){
             do {
                 mResultBean.setLrc(cursor.getString(cursor.getColumnIndex("lrcUrl")));
+                mResultBean.setAid(cursor.getInt(cursor.getColumnIndex("aid")));
+                mResultBean.setSong(cursor.getString(cursor.getColumnIndex("songName")));
+                mResultBean.setSingerName(cursor.getString(cursor.getColumnIndex("singerName")));
                 resultBeanList.add(mResultBean);
             }while (cursor.moveToNext());
         }
@@ -172,10 +187,10 @@ public class MusicDB {
      * 从数据库中读取ImageBean.DataBean的数据
      * image
      */
-    public Bitmap loadImage(String imageUrl){
+    public Bitmap loadImage(String singerName){
         Bitmap imageBitmap = null;
-        Cursor cursor = db.rawQuery("select * from image where imageUrl = ?",new String[]{imageUrl});
-        byte[] imageQuery=null;
+        Cursor cursor = db.rawQuery("select * from image where singerName = ?",new String[]{singerName});
+        byte[] imageQuery;
         if (cursor.moveToFirst()){
             do {
                 //将Blob数据转化为字节数组
@@ -214,12 +229,46 @@ public class MusicDB {
     /**
      * 插入数据库时查看数据库中是否有imageUrl对应的图片
      */
-    public boolean isExistsImage(String imageUrl){
-        Cursor cursor = db.rawQuery("select * from image where imageUrl= ?",new String[]{imageUrl});
+    public boolean isExistsImage(String singerName){
+        Cursor cursor = db.rawQuery("select * from image where singerName= ?",new String[]{singerName});
         boolean exists = cursor.moveToNext();
         cursor.close();
         return exists;
     }
 
+    /**
+     * 根据歌名获取id，用来区别内存里的歌所对应的id
+     * @param songId
+     * @return
+     */
+    public String[] getSongInfo(String songId){
+        String[] songInfo = new String[2];
+        Cursor cursor = db.rawQuery("select * from entity where song_id = ?",new String[]{songId});
+        songInfo[0] = cursor.getString(cursor.getColumnIndex("song_name"));
+        songInfo[1] = cursor.getString(cursor.getColumnIndex("singer_name"));
+        return songInfo;
+    }
 
+    /**
+     * 根据歌名，歌手名来获取lrcID
+     * @param songName
+     * @param singerName
+     * @return
+     */
+    public int getLrcId(String songName,String singerName){
+        Cursor cursor = db.rawQuery("select * from geci where songName = ? and singerName = ?",new String[]{songName,singerName});
+        if (cursor.moveToNext()){
+            int LrcId = cursor.getInt(cursor.getColumnIndex("aid"));
+            return LrcId;
+        }else {
+            return -1;
+        }
+    }
+
+    public boolean isExistsLrc(int aid){
+        Cursor cursor = db.rawQuery("select * from geci where aid= ?",new String[]{aid+""});
+        boolean exists = cursor.moveToNext();
+        cursor.close();
+        return exists;
+    }
 }

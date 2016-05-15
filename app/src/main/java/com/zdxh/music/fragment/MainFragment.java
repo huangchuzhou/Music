@@ -8,26 +8,23 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.zdxh.music.R;
-import com.zdxh.music.activity.SearchListAty;
 import com.zdxh.music.application.MusicApplication;
 import com.zdxh.music.bean.EntityBean;
 import com.zdxh.music.service.MediaService;
+import com.zdxh.music.util.DownloadMp3;
 import com.zdxh.music.util.EnjoyAdapter;
 import com.zdxh.music.util.ViewPagerAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +32,7 @@ import java.util.List;
  * Created by huangchuzhou on 2016/4/8.
  * 发现页面
  */
-public class MainFragment extends Fragment implements ViewPager.OnPageChangeListener, AdapterView.OnItemClickListener, View.OnClickListener {
+public class MainFragment extends Fragment implements ViewPager.OnPageChangeListener, AdapterView.OnItemClickListener{
     private ListView enjoyList;
     private EnjoyAdapter adapter;
     private EnjoyReceiver mEnjoyReceiver;
@@ -46,13 +43,12 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
     private int[] ids={R.id.iv1,R.id.iv2,R.id.iv3,R.id.iv4,R.id.iv5};//导航点对应的图标
     private ArrayList<EntityBean.DataBean> dataBeanArrayList;
     public static boolean isPlaying = false;
-    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl）
-    private static String[] data = new String[4];
+
     //声明SlidingMenu
-    private SlidingMenu mSlidingMenu;
-    private LinearLayout more;
-    private ImageButton back;
-    private TextView t;
+//    private SlidingMenu mSlidingMenu;
+//    private LinearLayout more;
+//    private ImageButton back;
+//    private TextView t;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,13 +67,13 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
 
         View view = inflater.inflate(R.layout.main_fragment_layout,container,false);
         enjoyList = (ListView) view.findViewById(R.id.enjoyList);
-        more = (LinearLayout) view.findViewById(R.id.more);
-        more.setOnClickListener(this);
+//        more = (LinearLayout) view.findViewById(R.id.more);
+//        more.setOnClickListener(this);
         vp = (ViewPager) view.findViewById(R.id.vp);
 
         View mView = inflater.inflate(R.layout.more_content,null);
-        back = (ImageButton) mView.findViewById(R.id.back);
-        t = (TextView) mView.findViewById(R.id.t);
+//        back = (ImageButton) mView.findViewById(R.id.back);
+//        t = (TextView) mView.findViewById(R.id.t);
         views = new ArrayList<>();
         initViews();
         dots = new ImageView[views.size()];
@@ -86,10 +82,10 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
         }
 
         //初始化SlidingMenu及定义其属性
-        mSlidingMenu = new SlidingMenu(getActivity());
-        mSlidingMenu.setMode(SlidingMenu.RIGHT);
-        mSlidingMenu.attachToActivity(getActivity(),SlidingMenu.SLIDING_CONTENT);
-        mSlidingMenu.setMenu(R.layout.more_content);
+//        mSlidingMenu = new SlidingMenu(getActivity());
+//        mSlidingMenu.setMode(SlidingMenu.RIGHT);
+//        mSlidingMenu.attachToActivity(getActivity(),SlidingMenu.SLIDING_CONTENT);
+//        mSlidingMenu.setMenu(R.layout.more_content);
 
         return view;
     }
@@ -101,26 +97,27 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
         dataBeanArrayList = new ArrayList<>();
         //只取前3个数据作为最近在听列表的三个选项
         if (MusicApplication.getEnjoy().size()!=0){
-
+            ArrayList<EntityBean.DataBean> dataBeens = new ArrayList<>(MusicApplication.getEnjoy());
             if (MusicApplication.getEnjoy().size()>3){
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(0));
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(1));
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(2));
+
+                dataBeanArrayList.add(dataBeens.get(0));
+                dataBeanArrayList.add(dataBeens.get(1));
+                dataBeanArrayList.add(dataBeens.get(2));
 //                EntityBean.DataBean[] dataBeen = {MusicApplication.getEnjoy().get(0),MusicApplication.getEnjoy().get(1),MusicApplication.getEnjoy().get(2)};
 //                isEquals(dataBeen);
             }else if (MusicApplication.getEnjoy().size()==3){
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(0));
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(1));
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(2));
+                dataBeanArrayList.add(dataBeens.get(0));
+                dataBeanArrayList.add(dataBeens.get(1));
+                dataBeanArrayList.add(dataBeens.get(2));
 //                EntityBean.DataBean[] dataBeen = {MusicApplication.getEnjoy().get(0),MusicApplication.getEnjoy().get(1),MusicApplication.getEnjoy().get(2)};
 //                isEquals(dataBeen);
             }else if(MusicApplication.getEnjoy().size()==2){
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(0));
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(1));
+                dataBeanArrayList.add(dataBeens.get(0));
+                dataBeanArrayList.add(dataBeens.get(1));
 //                EntityBean.DataBean[] dataBeen = {MusicApplication.getEnjoy().get(0),MusicApplication.getEnjoy().get(1)};
 //                isEquals(dataBeen);
             }else if (MusicApplication.getEnjoy().size()==1){
-                dataBeanArrayList.add(MusicApplication.getEnjoy().get(0));
+                dataBeanArrayList.add(dataBeens.get(0));
 //                EntityBean.DataBean[] dataBeen = {MusicApplication.getEnjoy().get(0)};
 //                isEquals(dataBeen);
             }
@@ -129,24 +126,24 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
 
         enjoyList.setAdapter(adapter);
         enjoyList.setOnItemClickListener(this);
-        back.setOnClickListener(this);
+//        back.setOnClickListener(this);
         //处理Fragment的按返回键
         // 主界面获取焦点
-        getView().setFocusableInTouchMode(true);
-        getView().requestFocus();
-        getView().setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
-                    // handle back button
-                    if (mSlidingMenu.isMenuShowing()){
-                        mSlidingMenu.showContent();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
+//        getView().setFocusableInTouchMode(true);
+//        getView().requestFocus();
+//        getView().setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+//                    // handle back button
+//                    if (mSlidingMenu.isMenuShowing()){
+//                        mSlidingMenu.showContent();
+//                    }
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
 
     }
 
@@ -200,46 +197,91 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        MusicApplication.isFromSearchListAty = false;
+        MusicApplication.isCollection = false;
+        EntityBean.DataBean.AuditionListBean auditionListBean;
+        String songUrl;
         isPlaying = true;
+        MediaService.isPlay = true;
         EntityBean.DataBean mDatabean = dataBeanArrayList.get(position);
+        Log.d("TAG",mDatabean.toString());
         List<EntityBean.DataBean.AuditionListBean> auditionListBeenList = mDatabean.getAudition_list();
-        EntityBean.DataBean.AuditionListBean auditionListBean = auditionListBeenList.get(SearchListAty.songUrlLocation);
-        String songUrl = auditionListBean.getUrl();
+        auditionListBean = auditionListBeenList.get(MusicApplication.songUrlLocation[position]);
+
+        //先判断在内存card中是否有相应的歌曲
+        File file = new File(DownloadMp3.DOWNLOAD_PATH,mDatabean.getSong_id()+".mp3");
+        if (file.exists()){
+            songUrl = file.getAbsolutePath();
+        }else {
+            songUrl = auditionListBean.getUrl();
+        }
+
+        //判断当前点击的歌是否有被收藏
+//        for (EntityBean.DataBean databean : MusicApplication.collections) {
+//            if (mDatabean == databean){
+//                MusicApplication.isCollection = true;
+//                Intent intent = new Intent();
+//                intent.setAction(MediaService.COLLECTION);
+//                getActivity().sendBroadcast(intent);
+//            }else {
+//                MusicApplication.isCollection = false;
+//                Intent intent = new Intent();
+//                intent.setAction(MediaService.COLLECTION);
+//                getActivity().sendBroadcast(intent);
+//            }
+//
+//        }
 
         //传递songUrl给MediaService
         Intent intent = new Intent(getActivity(), MediaService.class);
         intent.putExtra("songUrl", songUrl);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("databean",mDatabean);
+        intent.putExtras(bundle);
         intent.setAction(MediaService.PLAY);
         getActivity().startService(intent);
 
-        data[0] = mDatabean.getSinger_name();  //data数组第一项保存SingerName
-        data[1] = mDatabean.getSong_name();  //data数组第二项保存SongName
-        data[2] = songUrl;   //data数组第三项保存songUrl
-
+        MusicApplication.data[0] = mDatabean.getSinger_name();  //data数组第一项保存SingerName
+        MusicApplication.data[1] = mDatabean.getSong_name();  //data数组第二项保存SongName
+        MusicApplication.data[2] = songUrl;   //data数组第三项保存songUrl
+        for (EntityBean.DataBean databean : MusicApplication.collections) {
+            if (databean == mDatabean){
+                MusicApplication.isCollection = true; //有被收藏
+                //发送广播
+                Intent intentOne = new Intent();
+                intentOne.setAction(MediaService.COLLECTION);
+                getActivity().sendBroadcast(intentOne);
+                break;
+            }else {
+                MusicApplication.isCollection = false; //没有被收藏
+                //发送广播
+                Intent intentTwo = new Intent();
+                intentTwo.setAction(MediaService.COLLECTION);
+                getActivity().sendBroadcast(intentTwo);
+            }
+        }
         Intent mIntent = new Intent();
         mIntent.setAction(MediaService.RECEIVERPLAY);
-
         getActivity().sendBroadcast(mIntent);
 
     }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.more:
-                t.setText("12333");
-                mSlidingMenu.toggle(true);  //slidingMenu切换菜单呈现一个切换效果
-                break;
-            case R.id.back:
-                //slidingMenu的回退事件
-                if (mSlidingMenu.isMenuShowing()){
-                    mSlidingMenu.showContent();
-                }
-                break;
-        }
-
-
-    }
+//
+//    @Override
+//    public void onClick(View v) {
+//        switch (v.getId()){
+//            case R.id.more:
+//                mSlidingMenu.toggle(true);  //slidingMenu切换菜单呈现一个切换效果
+//                break;
+//            case R.id.back:
+//                //slidingMenu的回退事件
+//                if (mSlidingMenu.isMenuShowing()){
+//                    mSlidingMenu.showContent();
+//                }
+//                break;
+//        }
+//
+//
+//    }
 
 
     class EnjoyReceiver extends BroadcastReceiver{
@@ -252,10 +294,4 @@ public class MainFragment extends Fragment implements ViewPager.OnPageChangeList
         }
     }
 
-
-
-    public static String[] returnData()
-    {
-        return data;
-    }
 }
