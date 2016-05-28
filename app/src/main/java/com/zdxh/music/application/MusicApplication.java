@@ -27,8 +27,8 @@ public class MusicApplication extends Application {
     public static int[] songUrlLocation ={-1,-1,-1};
 
     public static int flag = -1; //标志添加到MainFragment的enjoyList的个数
-    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl）
-    public static String[] data = new String[3];
+    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl,duration）
+    public static String[] data = new String[4];
 
     public static boolean isShowOther = false; //标志是否展示SearchListAty 的other页面
 
@@ -37,13 +37,17 @@ public class MusicApplication extends Application {
     public static ArrayList<EntityBean.DataBean> dataBeans = new ArrayList<>(); //保存最近播放的歌曲
 
     public static boolean isFromSearchListAty = false;  //标志数据来源
+
+    public static final String PLAY = "PLAY"; //标记歌曲播放
+
+    public static boolean isPause = true;   //默认按钮是播放标志
+
     @Override
     public void onCreate() {
         super.onCreate();
         enjoy = new ArrayList<>();
         mRequestQueue = Volley.newRequestQueue(getApplicationContext());
 //        dataBeensCollection = new ArrayList<>();
-
     }
 
     //MainFragment界面列表的数据

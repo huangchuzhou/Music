@@ -53,9 +53,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public boolean deleteDatabase(Context context) {
-        return context.deleteDatabase("music.db");
-    }
+//    public boolean deleteDatabase(Context context) {
+//        return context.deleteDatabase("music.db");
+//    }
 
 
 }

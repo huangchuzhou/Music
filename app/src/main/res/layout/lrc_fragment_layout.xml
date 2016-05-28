@@ -25,10 +25,40 @@
 
 
         <RelativeLayout
-
             android:layout_below="@id/lrcFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                        <TextView
+                            android:visibility="invisible"
+                            android:paddingLeft="10dp"
+                            android:layout_alignParentLeft="true"
+                            android:id="@+id/currentTime"
+                            android:text="1111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+                        <TextView
+                            android:visibility="invisible"
+                            android:paddingRight="10dp"
+                            android:layout_alignParentRight="true"
+                            android:id="@+id/finalTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                        <SeekBar
+                            android:visibility="invisible"
+                            android:id="@+id/sbMusic"
+                            android:padding="10dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                </LinearLayout>
                 <ImageView
                     android:src="@drawable/music_icon"
                     android:layout_width="100dp"
@@ -81,7 +111,6 @@
                             />
 
 
-
                         <ImageButton
                             android:id="@+id/btnLove"
                             android:padding="10dp"
@@ -89,7 +118,6 @@
                             android:layout_height="wrap_content"
                             android:background="@android:color/transparent"
                             android:src="@drawable/ic_favorite_border_red_500_18dp" />
-
 
                 </LinearLayout>
         </RelativeLayout>

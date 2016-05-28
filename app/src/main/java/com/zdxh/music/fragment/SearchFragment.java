@@ -135,33 +135,36 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
         DBHelper mDBHelper = new DBHelper(getActivity());
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/downloads/");
-        //获取该路径下的所有文件
-        File[] files = file.listFiles();
-        for (int i=0;i<files.length;i++){
+        if (file.exists()){
+            //获取该路径下的所有文件
+            File[] files = file.listFiles();
+            for (int i=0;i<files.length;i++){
 
-            if (files[i].getName().endsWith("mp3")){
-                Mp3Info mp3Info = new Mp3Info();
-                String songId = files[i].getName();
-                String[] id = songId.split("\\."); // 分隔字符串
-                mp3Info.setSong_id(id[0]);
-                Log.d("TAG","id="+id[0]+"-------------");
-                //从数据库中查找获取MP3Info的其他变量的值
+                if (files[i].getName().endsWith("mp3")){
+                    Mp3Info mp3Info = new Mp3Info();
+                    String songId = files[i].getName();
+                    String[] id = songId.split("\\."); // 分隔字符串
+                    mp3Info.setSong_id(id[0]);
+                    Log.d("TAG","id="+id[0]+"-------------");
+                    //从数据库中查找获取MP3Info的其他变量的值
 
-                cursor = db.rawQuery("select * from entity where song_id = ?",new String[]{id[0]});
-                if (cursor.moveToNext()){
-                    mp3Info.setSize(cursor.getString(cursor.getColumnIndex("size")));
-                    mp3Info.setSong_Name(cursor.getString(cursor.getColumnIndex("song_name")));
-                    mp3Info.setSinger_name(cursor.getString(cursor.getColumnIndex("singer_name")));
-                    mp3Info.setDuration(cursor.getString(cursor.getColumnIndex("duration")));
-                    mp3Infos.add(mp3Info);
+                    cursor = db.rawQuery("select * from entity where song_id = ?",new String[]{id[0]});
+                    if (cursor.moveToNext()){
+                        mp3Info.setSize(cursor.getString(cursor.getColumnIndex("size")));
+                        mp3Info.setSong_Name(cursor.getString(cursor.getColumnIndex("song_name")));
+                        mp3Info.setSinger_name(cursor.getString(cursor.getColumnIndex("singer_name")));
+                        mp3Info.setDuration(cursor.getString(cursor.getColumnIndex("duration")));
+                        mp3Infos.add(mp3Info);
+                    }
+                    Log.d("TAG","mp3Infos"+mp3Infos.toString());
+
+                    cursor.close(); //用完后必须关闭
+
                 }
-                Log.d("TAG","mp3Infos"+mp3Infos.toString());
-
-                cursor.close(); //用完后必须关闭
-
             }
+            db.close();
         }
-        db.close();
+
         return mp3Infos;
     }
 

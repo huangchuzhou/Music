@@ -45,6 +45,7 @@ public class RecentlyPlayMusicAdapter extends ArrayAdapter<EntityBean.DataBean> 
         viewHolder.singerName.setText(dataBean.getSinger_name());
         viewHolder.songName.setText(dataBean.getSong_name());
         //获取当前时间
+        System.setProperty("user.timezone","GMT+8");
         Date nowTime = new Date(System.currentTimeMillis());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat simpleDateFormatms = new SimpleDateFormat("HH:mm:ss");

@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -56,9 +55,9 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     private TextView tvSongName;
     private String songUrl;
 
-    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl）
-    private static String[] data = new String[3];
-    public static boolean isPause = false;
+    //返回到LRCFragment的数据有数组包装（SingerName SongName SongUrl duration）
+    private static String[] data = new String[4];
+
     public FinishReceiver mFinishReceiver = null;
     private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
     public static int currentPosition = -1;
@@ -74,6 +73,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     private String songUrlPre = null;  //获取前一首歌的url
     private String songUrlNext = null; //获取下一首歌的url
     private static EntityBean.DataBean mDataBean;
+    private static SearchListAty searchListAty;
 
     //异步处理数据
     private Handler mHandler = new Handler(){
@@ -84,10 +84,8 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                 EntityBean.DataBean dataBean = (EntityBean.DataBean)msg.obj;
                 //判断当前的歌手数据库中是否有其图片
                 String singerName = dataBean.getSinger_name();
-                Log.d("TAG","singerName1111111111:"+singerName);
                 if (MusicDB.musicDB.isExistsImage(singerName)){
                     album.setImageBitmap(MusicDB.musicDB.loadImage(singerName));
-                    Log.d("TAG","singerName22222222:"+singerName);
                 }else {
                     album.setImageResource(R.drawable.music_icon);
                 }
@@ -119,12 +117,16 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         }
     };
 
+    public static SearchListAty getSearchListAty() {
+        return searchListAty;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        MusicApplication.isShowOther = false;
+//        MusicApplication.isShowOther = false;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_list_aty_layout);
-
+        searchListAty = this;
         btnPlay = (ImageButton) findViewById(R.id.btnPlay);
         btnPrevious = (ImageButton) findViewById(R.id.btnPrevious);
         btnNext = (ImageButton) findViewById(R.id.btnNext);
@@ -139,12 +141,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         searchListView = (ListView) findViewById(R.id.search_listView);
         networkInfo = (TextView) findViewById(R.id.networkInfo);
 
-        //判断网络是否可达
-        if (MusicApplication.isNetworkAvailable){
-            searchListView.setVisibility(View.VISIBLE);
-            networkInfo.setVisibility(View.INVISIBLE);
-        }
-
 
         initDataBean();
         /**
@@ -152,6 +148,14 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
          * 这里的另一个线程指的是对网络数据的读取而开启的线程
          */
 
+        //判断网络是否可达
+        if (MusicApplication.isNetworkAvailable){
+            searchListView.setVisibility(View.VISIBLE);
+            networkInfo.setVisibility(View.INVISIBLE);
+        }else {
+            searchListView.setVisibility(View.INVISIBLE);
+            networkInfo.setVisibility(View.VISIBLE);
+        }
 
         try {
             Thread.sleep(1000);
@@ -160,6 +164,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
 
         btnPlay.setOnClickListener(this);
         btnPrevious.setOnClickListener(this);
@@ -257,42 +262,47 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        currentPosition = position;
-        MusicApplication.isShowOther = false; //关闭other页面
-        MusicApplication.isFromSearchListAty = true;
-        EntityBean mEntityBean = entityBeanArrayList.get(position);
-        List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
-        mDataBean = dataBeanList.get(position);
-        MusicApplication.dataBeans.add(mDataBean);
-        //判断当前点击的歌是否有被收藏
-        for (EntityBean.DataBean databean : MusicApplication.collections) {
-            if (databean == mDataBean){
-                MusicApplication.isCollection = true; //有被收藏
-                //发送广播
-                Intent intent = new Intent();
-                intent.setAction(MediaService.COLLECTION);
-                sendBroadcast(intent);
-                break;
-            }else {
-                MusicApplication.isCollection = false; //没有被收藏
-                //发送广播
-                Intent intent = new Intent();
-                intent.setAction(MediaService.COLLECTION);
-                sendBroadcast(intent);
+        MusicApplication.isPause = true;
+
+        if (MusicApplication.isNetworkAvailable == true){
+            currentPosition = position;
+            MusicApplication.isShowOther = false; //关闭other页面
+            MusicApplication.isFromSearchListAty = true;
+            EntityBean mEntityBean = entityBeanArrayList.get(position);
+            List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
+            mDataBean = dataBeanList.get(position);
+            MusicApplication.dataBeans.add(mDataBean);
+            //判断当前点击的歌是否有被收藏
+            for (EntityBean.DataBean databean : MusicApplication.collections) {
+                if (databean == mDataBean){
+                    MusicApplication.isCollection = true; //有被收藏
+                    //发送广播
+                    Intent intent = new Intent();
+                    intent.setAction(MediaService.COLLECTION);
+                    sendBroadcast(intent);
+                    break;
+                }else {
+                    MusicApplication.isCollection = false; //没有被收藏
+                    //发送广播
+                    Intent intent = new Intent();
+                    intent.setAction(MediaService.COLLECTION);
+                    sendBroadcast(intent);
+                }
             }
-        }
 
-        databeansSize = dataBeanList.size();
-        //先判断在内存card中是否有相应的歌曲
-        file = new File(DownloadMp3.DOWNLOAD_PATH,mDataBean.getSong_id()+".mp3");
-        if(file.exists()){
-            //从本地获取Mp3文件
-            getMp3FromLocal(mDataBean,position,file,LOCAL);
+            databeansSize = dataBeanList.size();
+            //先判断在内存card中是否有相应的歌曲
+            file = new File(DownloadMp3.DOWNLOAD_PATH,mDataBean.getSong_id()+".mp3");
+            if(file.exists()){
+                //从本地获取Mp3文件
+                getMp3FromLocal(mDataBean,position,file,LOCAL);
+            }else {
+                //从远程获取Mp3文件
+                getMp3FromRemote(mDataBean,position,REMOTE);
+            }
         }else {
-            //从远程获取Mp3文件
-            getMp3FromRemote(mDataBean,position,REMOTE);
+            Toast.makeText(SearchListAty.this,"当前网络不可用",Toast.LENGTH_SHORT).show();
         }
-
     }
 
     private void getMp3FromLocal(EntityBean.DataBean dataBean,int position, File file, String local) {
@@ -301,7 +311,10 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         initView(position,local);
         //传递songUrl给MediaService
         sendSongUrlToService(dataBean,file.toString());
+
     }
+
+
 
     private void getMp3FromRemote(EntityBean.DataBean dataBean,int position, String remote) {
         //网络可用
@@ -313,14 +326,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         }else {   //网络不用
             Toast.makeText(this,"木有网络...",Toast.LENGTH_SHORT).show();
         }
-
-
-//        if (MusicApplication.isCollection==true){
-//            btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
-//
-//        }else{
-//            btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
-//        }
     }
 
 
@@ -369,15 +374,20 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         data[1] = mDataBean.getSong_name();  //data数组第二项保存SongName
 
         List<EntityBean.DataBean.AuditionListBean> auditionListBeanList = mDataBean.getAudition_list();
+        EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(position);
         //远程
         if (from.equals(REMOTE)){
-            EntityBean.DataBean.AuditionListBean mAuditionListBean = auditionListBeanList.get(position);
 
             songUrl = mAuditionListBean.getUrl();
             data[2] = songUrl;   //data数组第三项保存songUrl
         }else if (from.equals(LOCAL)){   //本地
             songUrl = file.getAbsolutePath(); //获取MP3文件的路径
             data[2] = songUrl;
+        }
+        data[3] = mAuditionListBean.getDuration();
+        if (MusicApplication.isPause == true){
+            btnPlay.setImageResource(R.drawable.ic_pause_white_18dp);
+            MusicApplication.isPause = false;
         }
 
     }
@@ -425,11 +435,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         }
     }
 
-//    @Override
-//    public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-//        MusicApplication.isShowOther = false;
-//    }
-
     //处理图片的线程
     class ImageThread extends Thread{
         Bitmap bitmap;
@@ -455,9 +460,8 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         Bundle bundle = new Bundle();
         bundle.putSerializable("databean",dataBean);
         intent.putExtras(bundle);
-        intent.setAction(MediaService.PLAY);
-        btnPlay.setImageResource(R.drawable.ic_pause_white_18dp);
-        isPause = false;
+        intent.setAction(MusicApplication.PLAY);
+
         startService(intent);
     }
 
@@ -476,23 +480,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         MusicApplication.isShowOther = true; //展示Other页面
         currentPosition = position;
-        EntityBean mEntityBean = entityBeanArrayList.get(position);
-        List<EntityBean.DataBean> dataBeanList = mEntityBean.getData();
-        EntityBean.DataBean dataBean = dataBeanList.get(position);
-        LayoutInflater inflater = LayoutInflater.from(SearchListAty.this);
-//        View mView = inflater.inflate(R.layout.search_list_aty_item,null);
-//        LinearLayout collection = (LinearLayout) mView.findViewById(R.id.item_collection);
-//        collection.setOnClickListener(this);
-//        if (isCollection==true){
-//            //收藏这首歌
-//            MusicApplication.getDataBeensCollection().add(dataBean);
-//            btnLove.setImageResource(R.drawable.ic_favorite_red_500_18dp);
-//
-////            isLove = true;
-//        }else{
-//            btnLove.setImageResource(R.drawable.ic_favorite_border_red_500_18dp);
-////            isLove = false;
-//        }
         adapter.notifyDataSetChanged();
         return true;
     }
@@ -506,9 +493,9 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
             case R.id.btnPlay:
 
                 Intent intentPlay = new Intent(SearchListAty.this, MediaService.class);
-                if (isPause == false){
+                if (MusicApplication.isPause == false){
                     btnPlay.setImageResource(R.drawable.ic_play_arrow_white_18dp);
-                    isPause = true;
+                    MusicApplication.isPause = true;
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("databean",mDataBean);
                     intentPlay.putExtras(bundle);
@@ -517,7 +504,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                     startService(intentPlay);
                 }else {
                     btnPlay.setImageResource(R.drawable.ic_pause_white_18dp);
-                    isPause = false;
+                    MusicApplication.isPause = false;
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("databean",mDataBean);
                     intentPlay.putExtras(bundle);
@@ -531,10 +518,11 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                 //区别各种情况判断btnPrevious btnNext 是否可以点击
                 if (currentPosition != 0){
                     Intent intentPrevious = new Intent(SearchListAty.this, MediaService.class);
-                    if (isPause == false){
+                    if (MusicApplication.isPause == false){
                         initView(currentPosition,REMOTE);
 
                         btnPlay.setImageResource(R.drawable.ic_pause_white_18dp);
+                        MusicApplication.isPause = false;
                         //获取前一首歌的url
                         EntityBean.DataBean dataBean = getPreSongUrl(currentPosition);
                         Bundle bundle = new Bundle();
@@ -542,7 +530,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                         intentPrevious.putExtras(bundle);
 
                         intentPrevious.putExtra("songUrl",songUrlPre);
-                        intentPrevious.setAction(MediaService.PLAY);
+                        intentPrevious.setAction(MusicApplication.PLAY);
                         startService(intentPrevious);
                     }
                     currentPosition--;
@@ -553,12 +541,11 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
             case R.id.btnNext:
 
                 if (currentPosition+1 <databeansSize){
-                    Log.d("TAG","btnNext");
                     Intent intentNext = new Intent(SearchListAty.this, MediaService.class);
-                    if (isPause == false) {
+                    if (MusicApplication.isPause == false) {
                         initView(currentPosition,REMOTE);
                         btnPlay.setImageResource(R.drawable.ic_pause_white_18dp);
-
+                        MusicApplication.isPause = false;
                         //获取下一首歌的url
                         EntityBean.DataBean dataBean = getNextSongUrl(currentPosition);
                         Bundle bundle = new Bundle();
@@ -566,7 +553,7 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
                         intentNext.putExtras(bundle);
 
                         intentNext.putExtra("songUrl", songUrlNext);
-                        intentNext.setAction(MediaService.PLAY);
+                        intentNext.setAction(MusicApplication.PLAY);
                         startService(intentNext);
                     }
                     currentPosition++;
@@ -608,7 +595,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         //后一首歌
         EntityBean.DataBean.AuditionListBean auditionListBeanNext = auditionListBeanListNext.get(++currentPosition);
         songUrlNext = auditionListBeanNext.getUrl();
-        Log.d("TAG",dataBeanNext.toString());
         SongUrlThread threadNext = new SongUrlThread(dataBeanNext);
         threadNext.start();
 
@@ -625,7 +611,6 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
         songUrlPre = auditionListBeanPre.getUrl();
 
         SongUrlThread threadPre = new SongUrlThread(dataBean);
-        Log.d("TAG",dataBean.toString());
         threadPre.start();
 
         return dataBean;
@@ -636,8 +621,9 @@ public class SearchListAty extends Activity implements AdapterView.OnItemClickLi
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(MediaService.RECEIVERFINISH)){
-                btnPlay.setImageResource(R.drawable.ic_play_arrow_white_18dp);
+            if (intent.getAction().equals(MediaService.RECEIVERFINISH)&&MediaService.isFinish){
+//                btnPlay.setImageResource(R.drawable.ic_play_arrow_white_18dp);
+//                MusicApplication.isPause = true;
             }
         }
     }

@@ -10,7 +10,6 @@ import com.zdxh.music.db.MusicDB;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,8 +18,6 @@ import java.util.List;
  */
 public class Search {
     private String searchName;  //搜索的歌名或者歌手名
-
-    private ArrayList<EntityBean> entityBeanArrayList = new ArrayList<>();
     public Search(String searchName){
         this.searchName = searchName;
     }

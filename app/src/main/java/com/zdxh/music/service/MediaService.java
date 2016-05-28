@@ -13,10 +13,12 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 
 import com.zdxh.music.R;
+import com.zdxh.music.application.MusicApplication;
 import com.zdxh.music.bean.EntityBean;
 import com.zdxh.music.db.MusicDB;
 import com.zdxh.music.fragment.LRCFragment;
 import com.zdxh.music.mp3.LrcProcess;
+import com.zdxh.music.mp3.Mp3Info;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,7 +31,6 @@ import java.util.ArrayList;
  */
 public class MediaService extends Service {
     //标记是否播放
-    public static final String PLAY = "PLAY";
     public static final String PAUSE = "PAUSE";
     public static final String RESUME = "RESUME";
     public static boolean isPlay = false;
@@ -39,16 +40,17 @@ public class MediaService extends Service {
     public static final String ENJOYPLAY = "ENJOYPLAY";  //MainFragment的最近播放列表的标志
     public static final String RECEIVERFINISH = "RECEIVERFINISH";//完成播放
     public static final String COLLECTION = "COLLECTION";
-    private MediaPlayer player = new MediaPlayer();
+    public static MediaPlayer player = new MediaPlayer();
 
     private LrcProcess mLrcProcess; //歌词处理
     private ArrayList<String> lrcList = new ArrayList<>(); //存放歌词列表对象
     private ArrayList<Long> timeList = new ArrayList<>(); //存放歌词时间对象
     private int index = 0;          //歌词检索值
-    public static final String SHOW_LRC = "SHOW_LRC"; //通知显示歌词
+    //    public static final String SHOW_LRC = "SHOW_LRC"; //通知显示歌词
     private int currentTime;    //当前播放进度
     private int duration;       //播放长度
-    public static final String MUSIC_CURRENT = "MUSIC_CURRENT";	//当前音乐播放时间更新动作
+    public static final String MUSIC_CURRENT = "MUSIC_CURRENT";//当前音乐播放时间更新动作
+    private EntityBean.DataBean dataBean;
     /**
      * handler用来接收消息，来发送广播更新播放时间
      */
@@ -70,17 +72,22 @@ public class MediaService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-
         if (intent !=null){
             String songUrl = intent.getStringExtra("songUrl");
             Bundle bundle = intent.getExtras();
-            EntityBean.DataBean dataBean = (EntityBean.DataBean) bundle.getSerializable("databean");
-            //判断songUrl是本地文件还是网络文件
-            if (songUrl.endsWith("mp3")){
-                //本地播放音乐
-                localPlay(intent,songUrl,dataBean);
-            }else {
-                remotePlay(intent,songUrl,dataBean);
+            dataBean = (EntityBean.DataBean) bundle.getSerializable("databean");
+            Mp3Info mp3Info = bundle.getParcelable("mp3Info");
+//            Mp3Info mp3Info = bundle
+            if (dataBean != null){
+                //判断songUrl是本地文件还是网络文件
+                if (songUrl.endsWith("mp3")){
+                    //本地播放音乐
+                    localPlay(intent,songUrl,dataBean);
+                }else {
+                    remotePlay(intent,songUrl,dataBean);
+                }
+            }else if (mp3Info != null){
+                localPlayLMF(intent,songUrl,mp3Info);
             }
         }
         //暂停音乐
@@ -108,25 +115,61 @@ public class MediaService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void localPlay(Intent intent, String songUrl, EntityBean.DataBean dataBean) {
+    private void localPlay(Intent intent, final String songUrl, EntityBean.DataBean dataBean) {
         //传过来的action是播放play
-        if (PLAY.equals(intent.getAction())) {
+        if (MusicApplication.PLAY.equals(intent.getAction())) {
             initLrc(dataBean);
-            if (player.isPlaying()) {
-                player.reset();
-            }
-            try {
-                player.setDataSource(songUrl);
-                player.prepare();
-                player.start();
-                isPlay = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (player.isPlaying()) {
+                        player.reset();
+                    }
+                    try {
+                        player.setDataSource(songUrl);
+                        player.prepare();
+                        player.start();
+                        isPlay = true;
+                        isFinish = false;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-            //发送广播
-            Intent IntentPlay = new Intent(MediaService.RECEIVERPLAY);
-            sendBroadcast(IntentPlay);
+                    //发送广播
+                    Intent IntentPlay = new Intent(MediaService.RECEIVERPLAY);
+                    sendBroadcast(IntentPlay);
+                }
+            }).start();
+
+        }
+    }
+
+    private void localPlayLMF(Intent intent, final String songUrl, Mp3Info mp3Info){
+        //传过来的action是播放play
+        if (MusicApplication.PLAY.equals(intent.getAction())) {
+            initLrcFromLMF(mp3Info);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (player.isPlaying()) {
+                        player.reset();
+                    }
+                    try {
+                        player.setDataSource(songUrl);
+                        player.prepare();
+                        player.start();
+                        isPlay = true;
+                        isFinish = false;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    //发送广播
+                    Intent IntentPlay = new Intent(MediaService.RECEIVERPLAY);
+                    sendBroadcast(IntentPlay);
+                }
+            }).start();
+
         }
     }
 
@@ -150,20 +193,26 @@ public class MediaService extends Service {
     }
 
     //播放音乐
-    private void remotePlay(Intent intent, String songUrl, EntityBean.DataBean dataBean) {
+    private void remotePlay(Intent intent, final String songUrl, EntityBean.DataBean dataBean) {
         //传过来的action是播放play
-        if (PLAY.equals(intent.getAction())) {
+        if (MusicApplication.PLAY.equals(intent.getAction())) {
             initLrc(dataBean);
-            if (player.isPlaying()) {
-                player.reset();
-            }
-            player = MediaPlayer.create(this, Uri.parse(songUrl));
-            player.start();
-            isPlay = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (player.isPlaying()) {
+                        player.reset();
+                    }
+                    player = MediaPlayer.create(MediaService.this, Uri.parse(songUrl));
+                    player.start();
+                    isPlay = true;
+                    isFinish = false;
+                    //发送广播
+                    Intent IntentPlay = new Intent(MediaService.RECEIVERPLAY);
+                    sendBroadcast(IntentPlay);
+                }
+            }).start();
 
-            //发送广播
-            Intent IntentPlay = new Intent(MediaService.RECEIVERPLAY);
-            sendBroadcast(IntentPlay);
         }
 
     }
@@ -186,16 +235,59 @@ public class MediaService extends Service {
 
     /**
      * 初始化歌词配置
-    */
+     */
     public void initLrc(EntityBean.DataBean dataBean){
 
         mLrcProcess = new LrcProcess();
+//        LRCFragment.sbMusic.setVisibility(View.VISIBLE);
+//        LRCFragment.currentTime.setVisibility(View.VISIBLE);
+//        LRCFragment.finalTime.setVisibility(View.VISIBLE);
+        int lrcId;
+        //读取歌词文件
+        if(dataBean != null){
+            //获取lrc文件
+            lrcId = MusicDB.musicDB.getLrcId(dataBean.getSong_name(),dataBean.getSinger_name());
+
+            if (lrcId != -1){
+                LRCFragment.lrcView.setVisibility(View.VISIBLE);
+                InputStream inputStream = null;
+                try {
+                    inputStream = new FileInputStream(Environment.getExternalStorageDirectory().getAbsolutePath() +"/downloads/lrc/"+lrcId+".lrc");
+                    ArrayList<String> mp3Titles = mLrcProcess.getMp3Titles();
+                    mLrcProcess.process(inputStream);
+                    lrcList = mLrcProcess.getLrcList();
+                    timeList = mLrcProcess.getTimeList();
+                    LRCFragment.lrcView.setmLrcList(lrcList);
+                    LRCFragment.mp3TitleTextView.setText("歌名："+mp3Titles.get(0)+"\n"+"歌手："+mp3Titles.get(1)+"\n"+"专辑："+mp3Titles.get(2));
+                    //切换带动画显示歌词
+                    LRCFragment.lrcView.setAnimation(AnimationUtils.loadAnimation(MediaService.this, R.anim.alpha_z));
+                    handler.post(mRunnable);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+            }else {
+
+                LRCFragment.lrcView.setVisibility(View.INVISIBLE);
+                LRCFragment.mp3TitleTextView.setText("没有找到相关的歌词文件");
+            }
+
+        }
+    }
+
+    public void initLrcFromLMF(Mp3Info mp3Info){
+
+        mLrcProcess = new LrcProcess();
+//        LRCFragment.sbMusic.setVisibility(View.VISIBLE);
+//        LRCFragment.currentTime.setVisibility(View.VISIBLE);
+//        LRCFragment.finalTime.setVisibility(View.VISIBLE);
         int lrcId;
         //读取歌词文件
 
         //获取lrc文件
-        lrcId = MusicDB.musicDB.getLrcId(dataBean.getSong_name(),dataBean.getSinger_name());
-
+        MusicDB musicDB = MusicDB.getInstance(MediaService.this);
+        lrcId = musicDB.getLrcId(mp3Info.getSong_Name(),mp3Info.getSinger_name());
         if (lrcId != -1){
             LRCFragment.lrcView.setVisibility(View.VISIBLE);
             InputStream inputStream = null;
@@ -210,16 +302,20 @@ public class MediaService extends Service {
                 //切换带动画显示歌词
                 LRCFragment.lrcView.setAnimation(AnimationUtils.loadAnimation(MediaService.this, R.anim.alpha_z));
                 handler.post(mRunnable);
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
         }else {
+
             LRCFragment.lrcView.setVisibility(View.INVISIBLE);
             LRCFragment.mp3TitleTextView.setText("没有找到相关的歌词文件");
         }
 
+
     }
+
     Runnable mRunnable = new Runnable() {
 
         @Override
@@ -259,6 +355,7 @@ public class MediaService extends Service {
         }
         return index;
     }
+
 }
 
 
